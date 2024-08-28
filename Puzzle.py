@@ -2,7 +2,7 @@
 # OSU Email: Gildayb@oregonstate.edu
 # Course: CS325 - Analysis of Algorithms
 # Assignment: 6- BFS
-# Due Date: 8/5/24
+# Date last modified: 8/5/24
 # Description: Implementation of a 2-D puzzle solver. This implementation uses Breadth-First Search (BFS)
 # to find the shortest path (least number of cells traversed) from the source to the destination on
 # the puzzle board.
