@@ -1,7 +1,5 @@
-# Name: Bralee Gilday
-# OSU Email: Gildayb@oregonstate.edu
-# Course: CS325 - Analysis of Algorithms
-# Assignment: 6- BFS
+# Author: Bralee Gilday
+# Course: CS325 - Analysis of Algorithms, Oregon State University
 # Date last modified: 8/5/24
 # Description: Implementation of a 2-D puzzle solver. This implementation uses Breadth-First Search (BFS)
 # to find the shortest path (least number of cells traversed) from the source to the destination on
@@ -209,30 +207,3 @@ def direction_of_path(shortest_path, start):
         current_cell = cell
 
     return direction_string
-
-
-# TESTING/ Function calls
-# puzzle = [
-#   ['-', '-', '-', '-', '-'],
-#   ['-', '-', '#', '-', '-'],
-#   ['-', '-', '-', '-', '-'],
-#   ['#', '-', '#', '#', '-'],
-#   ['-', '#', '-', '-', '-']
-#  ]
-# print(puzzle)
-
-# print("Example 1: ")
-# print("Expected output: [(0, 2), (0, 1), (1, 1), (2, 1), (2, 2)]")
-# print("Actual output:", solve_puzzle(puzzle,(0,2), (2,2)))
-# #
-# print("Example 2: ")
-# print("Expected output: [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 4), (2, 4), (3, 4), (4, 4)]")
-# print("Actual output:", solve_puzzle(puzzle,(0,0), (4,4)))
-#
-# print("Example 3: ")
-# print("Expected output: None")
-# print("Actual output:", solve_puzzle(puzzle, (0,0), (4,0)))
-#
-# print("Example 3: ")
-# print("Expected output: [(0,0)]")
-# print("Actual output:", solve_puzzle(puzzle, (0,0), (0,0)))
