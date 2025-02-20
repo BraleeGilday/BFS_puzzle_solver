@@ -54,7 +54,7 @@ The time complexity of the BFS approach is **O(M * N)**, where:
 This complexity reflects the fact that each cell is processed at most once, ensuring an efficient exploration of the grid.
 
 ### Project Status
-This project is currently complete, with potential for future enhancements, such as...
+This project is currently complete.
 
 ### License
 This project is licensed under the MIT License. See the LICENSE file for more information.
