@@ -1,6 +1,6 @@
 # Author: Bralee Gilday
 # Course: CS325 - Analysis of Algorithms, Oregon State University
-# Date last modified: 8/5/24
+# Date last modified: 3/19/25
 # Description: Implementation of a 2-D puzzle solver. This implementation uses Breadth-First Search (BFS)
 # to find the shortest path (least number of cells traversed) from the source to the destination on
 # the puzzle board.
@@ -95,26 +95,21 @@ def find_rows(Board):
     :param Board: A 2D list representing the puzzle board.
     :return: The number of rows in the board.
     """
-    number_of_rows = 0
-    for lists in Board:
-        number_of_rows += 1
-    return number_of_rows
+    return len(Board)
 
 
 def find_columns(Board):
     """
     Finds the number of columns in the puzzle board.
 
+    Note: Currently making an assumption that the board is a true rectangle (all rows are equal lengths).
+
     time complexity: O(M) where M is the number of columns in the puzzle.
 
     :param Board: A 2D list representing the puzzle board.
     :return: The number of columns in the board.
     """
-    number_of_columns = 0
-    for element in Board[0]:
-        number_of_columns += 1
-    return number_of_columns
-
+    return len(Board[0])  
 
 def is_valid_move(Board, rows, columns, cell):
     """
@@ -207,3 +202,30 @@ def direction_of_path(shortest_path, start):
         current_cell = cell
 
     return direction_string
+
+
+
+# TESTING/ Function calls
+
+puzzle = [
+ ['-', '-', '-', '-', '-'],
+ ['-', '-', '#', '-', '-'],
+ ['-', '-', '-', '-', '-'],
+ ['#', '-', '#', '#', '-'],
+ ['-', '#', '-', '-', '-']
+]
+# Example 1: Solving from (0, 2) to (2, 2)
+print("Path from (0, 2) to (2, 2):", solve_puzzle(puzzle, (0, 2), (2, 2)))
+# Expected output: [(0, 2), (0, 1), (1, 1), (2, 1), (2, 2)], 'LDDR'
+
+# Example 2: Solving from (0,0) to (4,4)
+print("Path from (0, 0) to (4, 4):", solve_puzzle(puzzle, (0, 0), (4, 4)))
+# Expected path: [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (3, 4), (4, 4)], 'DDRRRRDD'
+
+# Example 3: No valid path from (0,0) to (4,0)
+print("Path from (0, 0) to (4, 0):", solve_puzzle(puzzle, (0, 0), (4, 0)))
+# Expected: None
+
+# Example 4: Starting and destination are the same
+print("Path from (0, 0) to (0, 0):", solve_puzzle(puzzle, (0, 0), (0, 0)))
+# Expected path: [(0,0)], ''

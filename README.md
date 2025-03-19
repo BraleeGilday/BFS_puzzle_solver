@@ -27,7 +27,7 @@ print("Path from (0, 2) to (2, 2):", solve_puzzle(puzzle, (0, 2), (2, 2)))
 
 # Example 2: Solving from (0,0) to (4,4)
 print("Path from (0, 0) to (4, 4):", solve_puzzle(puzzle, (0, 0), (4, 4)))
-# Expected path: [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 4), (2, 4), (3, 4), (4, 4)], 'DDRRRRDD'
+# Expected path: [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (3, 4), (4, 4)], 'DDRRRRDD'
 
 # Example 3: No valid path from (0,0) to (4,0)
 print("Path from (0, 0) to (4, 0):", solve_puzzle(puzzle, (0, 0), (4, 0)))
