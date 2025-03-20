@@ -25,9 +25,38 @@ from collections import deque
 
 class Board:
     """
+    Represents a 2D puzzle board for the BFS puzzle solver.
+
+    :param puzzle_board: A 2D list representing the puzzle board, where:
+                         - An empty cell is represented by `'-'`.
+                         - A barrier is represented by `'#'`.
+
+    Data Members:
+        _puzzle_board (list of list of str): The puzzle grid.
+        _num_rows (int): The total number of rows in the board.
+        _num_columns (int): The total number of columns in the board.
+        _moves (list of tuple): A list of valid movement directions, where each 
+                                tuple represents the (row change, column change).
+
+    Methods:
+        get_puzzle_board(): Returns the puzzle grid.
+        get_num_rows(): Returns the total number of rows in the board.
+        get_num_columns(): Returns the total number of columns in the board.
+        get_moves(): Returns a list of valid movement directions.
+        is_barrier(row_index, column_index): Checks if a given cell is a barrier.
+        is_valid_move(cell): Determines if a move to a given cell is valid 
+                             (within bounds and not a barrier).
+
+
     """
     def __init__(self, puzzle_board):
+        """
+        Initializes the Board with a given puzzle grid.
+
+        :param puzzle_board: A 2D list representing the puzzle board.
+        """
         self._puzzle_board = puzzle_board           # puzzle_board = a list of lists
+
         self._num_rows = len(puzzle_board)          # The number of lists represents the number of rows
         self._num_columns = len(puzzle_board[0])    # This is assuming all rows are the same length (valid puzzle board)
 
@@ -40,20 +69,44 @@ class Board:
         ]
 
     def get_puzzle_board(self):
+        """
+        Returns the puzzle grid.
+
+        :return: A 2D list representing the puzzle board.
+        """
         return self._puzzle_board
     
     def get_num_rows(self):
+        """
+        Returns the total number of rows in the board.
+
+        :return: The number of rows in the board.
+        """
         return self._num_rows
     
     def get_num_columns(self):
+        """
+        Returns the total number of columns in the board.
+
+        :return: The number of columns in the board.
+        """
         return self._num_columns
     
     def get_moves(self):
+        """
+        Returns a list of valid movement directions.
+
+        :return: A list of tuples representing (row change, column change).
+        """
         return self._moves
     
     def is_barrier(self, row_index, column_index):
         """
-        returns: True if cell is a barrier; False if cell is not a barrier
+        Checks if a given cell is a barrier.
+
+        :param row_index: The row index of the cell.
+        :param column_index: The column index of the cell.
+        :return: True if the cell is a barrier ('#'), False otherwise.
         """
         return self._puzzle_board[row_index][column_index] == "#"
     
@@ -65,13 +118,10 @@ class Board:
 
         time complexity: O(1)
 
-        :param Board: A 2D list representing the puzzle board.
-        :param rows: The total number of rows in the board.
-        :param columns: The total number of columns in the board.
         :param cell: A tuple representing the cell (row, column) to move to.
+
         :return: True if the move is valid (within bounds and not a barrier), False otherwise.
         """
-
         # Check that the cell is in bounds
         if cell[0] < 0 or cell[0] >= self._num_rows:
             # if cell is out of row bounds
@@ -92,26 +142,46 @@ class Board:
 
 class Puzzle:
     """
-        :param from_cell_dict: A dictionary mapping each cell to the cell it came from.
-        :param dict_key: The destination cell.
-        :param start: The source cell.
+    Represents a puzzle solver that uses Breadth-First Search (BFS) to find the shortest path 
+    from a source cell to a destination cell on a 2-D puzzle grid.
+
+    :param board: A puzzle grid, which contains the layout of empty cells (`-`) and barriers (`#`).
+    :param source: A tuple (row, column) representing the starting position on the board.
+    :param destination: A tuple (row, column) representing the target destination on the board.
+    
+    Data Members:
+        _board: An instance of the `Board` class, representing the puzzle grid.
+        _source: A tuple (row, column) representing the starting position on the board.
+        _destination: A tuple (row, column) representing the target destination on the board.
+        _visited_cells: A set that tracks the cells that have already been visited.
+        _bfs_queue: A queue used for BFS traversal, initially containing the source.
+        _from_cell: A dictionary which will hold the hold the optimal paths to reach each cell. 
+                    The key is a tuple to represent the current cell (row, column) and the 
+                    value is the cell it came from to get there.
+
+    Methods:
+        solve(): Solves the puzzle using BFS and returns the shortest path and directions.
+        get_shortest_path(): Traverses the path from the destination to the source using the from_cell dictionary.
+        get_directions(): Converts the shortest path into a string of movement directions (e.g., "RRDD").
     """
 
     def __init__(self, board, source, destination):
+        """
+        Initializes the Puzzle solver with a given board, source, and destination.
+
+        :param board: A puzzle grid, which contains the layout of empty cells (`-`) and barriers (`#`).
+        :param source: A tuple (row, column) representing the starting position.
+        :param destination: A tuple (row, column) representing the target destination.
+        """
         self._board = Board(board)
         self._source = source
         self._destination = destination
 
-        # Initialize an empty set of visited cells (cells will be added in the form of a tuple (row,column)).
-        self._visited_cells = set()
+        self._visited_cells = set()                 # cells will be added in the form of a tuple (row,column)
 
-        # Initialize an empty queue. Add the source vertex to the queue.
-        self._bfs_queue = deque()
-        self._bfs_queue.append(self._source)
+        self._bfs_queue = deque()                   # Initialize an empty queue. 
+        self._bfs_queue.append(self._source)        # Add the source vertex to the queue.
 
-        # Initialize a dictionary to hold the optimal paths to reach each cell.
-        # The key will be the tuple to represent the current cell and the value
-        # will be the cell it came from to get there.
         self._from_cell = {}
 
     
@@ -119,13 +189,13 @@ class Puzzle:
         """
         Solves the puzzle board to find the shortest path from the Source to the Destination using BFS.
 
-        time complexity: O(M*N), where N is the number of rows and M is the number of columns in the puzzle.
+        time complexity: O(M*N), where N is the number of rows and M is the number of columns in the puzzle 
+                        (i.e., we might visit every cell in the board once).
 
         :return: A tuple containing the shortest path as a list of cells and a string of directions (e.g., "RRDD").
         """
 
         # While the queue is not empty, dequeue the front element.
-        # In the worst case, we might visit every cell in the board once; time complexity O(M * N).
         while len(self._bfs_queue) != 0:
             current_cell = self._bfs_queue.popleft()              # tuple (row, column)
 
@@ -186,7 +256,7 @@ class Puzzle:
             be as large as the number of cells in the board, which is O(M * N).
 
         :param shortest_path: A list representing the shortest path from the source to the destination.
-        :param start: The source cell.
+
         :return: A string representing the directions (e.g., "RRDD").
         """
         current_cell = self._source
