@@ -23,209 +23,192 @@
 
 from collections import deque
 
-
-def solve_puzzle(Board, Source, Destination):
+class Board:
     """
-    Solves the puzzle board to find the shortest path from the Source to the Destination using BFS.
-
-    time complexity: O(M*N), where N is the number of rows and M is the number of columns in the puzzle.
-
-    :param Board: A 2D list representing the puzzle board where cells are either empty ('.') or barriers ('#').
-    :param Source: A tuple representing the starting cell (row, column).
-    :param Destination: A tuple representing the target cell (row, column).
-    :return: A tuple containing the shortest path as a list of cells and a string of directions (e.g., "RRDD").
     """
-    # Find out the dimensions of the puzzle board
-    total_rows = find_rows(Board)        # O(N)
-    total_columns = find_columns(Board)  # O(M)
+    def __init__(self, puzzle_board):
+        self._puzzle_board = puzzle_board           # puzzle_board = a list of lists
+        self._num_rows = len(puzzle_board)          # The number of lists represents the number of rows
+        self._num_columns = len(puzzle_board[0])    # This is assuming all rows are the same length (valid puzzle board)
 
-    # Initialize an empty set of visited cells (cells will be added in the form of a tuple (row,column)).
-    visited_cells = set()
+        # represent the (change in row index, change in column index)
+        self._moves = [
+                    (0, +1),   # right
+                    (0, -1),   # left
+                    (-1, 0),   # up
+                    (+1, 0)    # down
+        ]
 
-    # Initialize an empty queue. Add the source vertex to the queue.
-    bfs_queue = deque()
-    bfs_queue.append(Source)
+    def get_puzzle_board(self):
+        return self._puzzle_board
+    
+    def get_num_rows(self):
+        return self._num_rows
+    
+    def get_num_columns(self):
+        return self._num_columns
+    
+    def get_moves(self):
+        return self._moves
+    
+    def is_barrier(self, row_index, column_index):
+        """
+        returns: True if cell is a barrier; False if cell is not a barrier
+        """
+        return self._puzzle_board[row_index][column_index] == "#"
+    
 
-    # Initialize a dictionary to hold the optimal paths to reach each cell.
-    # The key will be the tuple to represent the current cell and the value
-    # will be the cell it came from to get there.
-    from_cell = {}
+    def is_valid_move(self, cell):
+        """
+        Checks if a move to a given cell is valid. That is, it makes sure the
+        cell is both on the board (within bounds) and not a barrier.
 
-    # While the queue is not empty, dequeue the front element.
-    # In the worst case, we might visit every cell in the board once; time complexity O(M * N).
-    while len(bfs_queue) != 0:
-        current_cell = bfs_queue.popleft()              # tuple (row, column)
+        time complexity: O(1)
 
-        # Check if the current vertex (cell) is the goal.
-        if current_cell == Destination:
-            # trace path in dictionary to get the shortest path
-            shortest_path = traverse_path(from_cell, Destination, Source)
-            direction_string = direction_of_path(shortest_path, Source)
+        :param Board: A 2D list representing the puzzle board.
+        :param rows: The total number of rows in the board.
+        :param columns: The total number of columns in the board.
+        :param cell: A tuple representing the cell (row, column) to move to.
+        :return: True if the move is valid (within bounds and not a barrier), False otherwise.
+        """
 
-            result = (shortest_path, direction_string)
+        # Check that the cell is in bounds
+        if cell[0] < 0 or cell[0] >= self._num_rows:
+            # if cell is out of row bounds
+            return False
+        
+        if cell[1] < 0 or cell[1] >= self._num_columns:
+            # if cell is out of column bounds
+            return False
+        
+        # If tuple is in bounds, then check that there is no barrier in the cell
+        if self.is_barrier(cell[0], cell[1]) == True:
+            # if cell is a barrier
+            return False
 
-            return result
-
-        else:
-            # Add current vertex v (as a tuple) to the set of visited vertices.
-            visited_cells.add(current_cell)
-
-            # Initialize valid moves on the board
-            moves = [(current_cell[0], (current_cell[1] + 1)),  # right
-                     (current_cell[0], (current_cell[1] - 1)),  # left
-                     ((current_cell[0] - 1), current_cell[1]),  # up
-                     ((current_cell[0] + 1), current_cell[1])]  # down
-
-            for adjacent_cell in moves:
-                # Ensure the cell is within bounds and not visited yet
-                if is_valid_move(Board, total_rows, total_columns, adjacent_cell)\
-                        and (adjacent_cell not in visited_cells):
-                    # Add the adjacent cell as a key to the dictionary; the value will be the current cell.
-                    from_cell[adjacent_cell] = current_cell
-                    # Enqueue adjacent cell
-                    bfs_queue.append(adjacent_cell)
+        # Valid move
+        return True
 
 
-def find_rows(Board):
+class Puzzle:
     """
-    Finds the number of rows in the puzzle board.
-
-    time complexity: O(N) where N is the number of rows in the puzzle.
-
-    :param Board: A 2D list representing the puzzle board.
-    :return: The number of rows in the board.
+        :param from_cell_dict: A dictionary mapping each cell to the cell it came from.
+        :param dict_key: The destination cell.
+        :param start: The source cell.
     """
-    return len(Board)
+
+    def __init__(self, board, source, destination):
+        self._board = Board(board)
+        self._source = source
+        self._destination = destination
+
+        # Initialize an empty set of visited cells (cells will be added in the form of a tuple (row,column)).
+        self._visited_cells = set()
+
+        # Initialize an empty queue. Add the source vertex to the queue.
+        self._bfs_queue = deque()
+        self._bfs_queue.append(self._source)
+
+        # Initialize a dictionary to hold the optimal paths to reach each cell.
+        # The key will be the tuple to represent the current cell and the value
+        # will be the cell it came from to get there.
+        self._from_cell = {}
+
+    
+    def solve(self):
+        """
+        Solves the puzzle board to find the shortest path from the Source to the Destination using BFS.
+
+        time complexity: O(M*N), where N is the number of rows and M is the number of columns in the puzzle.
+
+        :return: A tuple containing the shortest path as a list of cells and a string of directions (e.g., "RRDD").
+        """
+
+        # While the queue is not empty, dequeue the front element.
+        # In the worst case, we might visit every cell in the board once; time complexity O(M * N).
+        while len(self._bfs_queue) != 0:
+            current_cell = self._bfs_queue.popleft()              # tuple (row, column)
+
+            # Check if the current vertex (cell) is the goal.
+            if current_cell == self._destination:
+                # trace path in dictionary to get the shortest path
+                shortest_path = self.get_shortest_path()
+                direction_string = self.get_directions(shortest_path)
+
+                result = (shortest_path, direction_string)
+
+                return result
+
+            else:
+                # Add current vertex v (as a tuple) to the set of visited vertices.
+                self._visited_cells.add(current_cell)
+
+                for move in self._board.get_moves():
+                    adjacent_cell = (current_cell[0] + move[0], current_cell[1] + move[1])
+                    
+                    # Ensure the cell is within bounds and not visited yet
+                    if self._board.is_valid_move(adjacent_cell) and (adjacent_cell not in self._visited_cells):
+                        # Add the adjacent cell as a key to the dictionary; the value will be the current cell.
+                        self._from_cell[adjacent_cell] = current_cell
+                        # Enqueue adjacent cell
+                        self._bfs_queue.append(adjacent_cell)
+
+    def get_shortest_path(self):
+        """
+        Traces back the path from the destination to the source using the from_cell dictionary.
+
+        time complexity: O(P), where P is the length of the shortest path. In the worst case,
+            if the shortest path traverses through a significant portion of the board, P can
+            be as large as the number of cells in the board, which is O(M * N).
+
+        :return: A list representing the shortest path from the source to the destination.
+        """
+        # initialize a path that starts with the destination cell (will be reversed)
+        cell = self._destination
+        path = [cell]
+
+        # continue following the path until back to the starting cell
+        while cell != self._source:
+            dict_value = self._from_cell[cell]
+            path.append(dict_value)
+            cell = dict_value
+
+        # reverse path (to be from source to destination)
+        return path[::-1]
 
 
-def find_columns(Board):
-    """
-    Finds the number of columns in the puzzle board.
+    def get_directions(self, shortest_path):
+        """
+        Converts the shortest path into a string of directions.
 
-    Note: Currently making an assumption that the board is a true rectangle (all rows are equal lengths).
+        time complexity: O(P), where P is the length of the shortest path. In the worst case,
+            if the shortest path traverses through a significant portion of the board, P can
+            be as large as the number of cells in the board, which is O(M * N).
 
-    time complexity: O(M) where M is the number of columns in the puzzle.
+        :param shortest_path: A list representing the shortest path from the source to the destination.
+        :param start: The source cell.
+        :return: A string representing the directions (e.g., "RRDD").
+        """
+        current_cell = self._source
+        direction_string = ""
 
-    :param Board: A 2D list representing the puzzle board.
-    :return: The number of columns in the board.
-    """
-    return len(Board[0])  
+        for cell in shortest_path:
+            # if move is to the right
+            if cell == (current_cell[0], (current_cell[1] + 1)):    # right
+                direction_string += "R"
 
-def is_valid_move(Board, rows, columns, cell):
-    """
-    Checks if a move to a given cell is valid. That is, it makes sure the
-    cell is both on the board (within bounds) and not a barrier.
+            # if move is to the left
+            elif cell == (current_cell[0], (current_cell[1] - 1)):  # left
+                direction_string += "L"
 
-    time complexity: O(1)
+            # if move is down
+            elif cell == ((current_cell[0] - 1), current_cell[1]):  # up
+                direction_string += "U"
 
-    :param Board: A 2D list representing the puzzle board.
-    :param rows: The total number of rows in the board.
-    :param columns: The total number of columns in the board.
-    :param cell: A tuple representing the cell (row, column) to move to.
-    :return: True if the move is valid (within bounds and not a barrier), False otherwise.
-    """
-    # Check that the cell is in bounds
-    if cell[0] < 0 or cell[0] >= rows or cell[1] < 0 or cell[1] >= columns:
-        return False
+            # if move is up
+            elif cell == ((current_cell[0] + 1), current_cell[1]):  # down
+                direction_string += "D"
 
-    # If tuple is in bounds, then check that there is no barrier in the cell
-    if Board[cell[0]][cell[1]] == '#':
-        return False
+            current_cell = cell
 
-    # Valid move
-    return True
-
-
-def traverse_path(from_cell_dict, dict_key, start):
-    """
-    Traces back the path from the destination to the source using the from_cell dictionary.
-
-    time complexity: O(P), where P is the length of the shortest path. In the worst case,
-        if the shortest path traverses through a significant portion of the board, P can
-        be as large as the number of cells in the board, which is O(M * N).
-
-    :param from_cell_dict: A dictionary mapping each cell to the cell it came from.
-    :param dict_key: The destination cell.
-    :param start: The source cell.
-    :return: A list representing the shortest path from the source to the destination.
-    """
-    # initialize a path that starts with the destination cell (will be reversed)
-    path = [dict_key]
-
-    # continue following the path until back to the starting cell
-    while dict_key != start:
-        dict_value = from_cell_dict[dict_key]
-        path.append(dict_value)
-        dict_key = dict_value
-
-    # reverse path (to be from start to destination)
-    shortest_path = []
-    for index in range(len(path)-1, -1, -1):
-        cell = path[index]
-        shortest_path.append(cell)
-
-    return shortest_path
-
-
-def direction_of_path(shortest_path, start):
-    """
-    Converts the shortest path into a string of directions.
-
-    time complexity: O(P), where P is the length of the shortest path. In the worst case,
-        if the shortest path traverses through a significant portion of the board, P can
-        be as large as the number of cells in the board, which is O(M * N).
-
-    :param shortest_path: A list representing the shortest path from the source to the destination.
-    :param start: The source cell.
-    :return: A string representing the directions (e.g., "RRDD").
-    """
-    current_cell = start
-    direction_string = ""
-
-    for cell in shortest_path:
-        # if move is to the right
-        if cell == (current_cell[0], (current_cell[1] + 1)):    # right
-            direction_string += "R"
-
-        # if move is to the left
-        elif cell == (current_cell[0], (current_cell[1] - 1)):  # left
-            direction_string += "L"
-
-        # if move is down
-        elif cell == ((current_cell[0] - 1), current_cell[1]):  # up
-            direction_string += "U"
-
-        # if move is up
-        elif cell == ((current_cell[0] + 1), current_cell[1]):  # down
-            direction_string += "D"
-
-        current_cell = cell
-
-    return direction_string
-
-
-
-# TESTING/ Function calls
-
-puzzle = [
- ['-', '-', '-', '-', '-'],
- ['-', '-', '#', '-', '-'],
- ['-', '-', '-', '-', '-'],
- ['#', '-', '#', '#', '-'],
- ['-', '#', '-', '-', '-']
-]
-# Example 1: Solving from (0, 2) to (2, 2)
-print("Path from (0, 2) to (2, 2):", solve_puzzle(puzzle, (0, 2), (2, 2)))
-# Expected output: [(0, 2), (0, 1), (1, 1), (2, 1), (2, 2)], 'LDDR'
-
-# Example 2: Solving from (0,0) to (4,4)
-print("Path from (0, 0) to (4, 4):", solve_puzzle(puzzle, (0, 0), (4, 4)))
-# Expected path: [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (3, 4), (4, 4)], 'DDRRRRDD'
-
-# Example 3: No valid path from (0,0) to (4,0)
-print("Path from (0, 0) to (4, 0):", solve_puzzle(puzzle, (0, 0), (4, 0)))
-# Expected: None
-
-# Example 4: Starting and destination are the same
-print("Path from (0, 0) to (0, 0):", solve_puzzle(puzzle, (0, 0), (0, 0)))
-# Expected path: [(0,0)], ''
+        return direction_string
